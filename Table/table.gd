@@ -6,22 +6,11 @@ class_name Table extends Control
 @export var cascades: Array[CardFrame]
 
 func _ready() -> void:
-	for suit in Card.Suit.values():
-		for rank in range(Card.ACE, Card.KING+1):
-			cards.push_back(Card.newCard(suit, rank))
-
-	var z = 0
-	for card in cards:
-		z += 1
-		card.z_index = z
-		card.position = Vector2(100, 120 + 20 * z)
-		add_child(card)
-
-
-	# POSITIONING of Game Elements
+	self.z_index = RenderingServer.CANVAS_ITEM_Z_MIN
+	
+	## POSITIONING of Game Elements
 	var screen_width = get_viewport_rect().size.x
 	var _screen_height = get_viewport_rect().size.y
-
 
 	for i in range(0, 4):
 		var cell = CardFrame.newCardFrame(CardFrame.FrameType.FreeCell)
@@ -41,3 +30,16 @@ func _ready() -> void:
 		cascade.position = Vector2((2 * cascadeXOffset) + ((CardFrame.width + cascadeXOffset) * i), CardFrame.height + 20)
 		cascades.push_back(cascade)
 		add_child(cascade)
+
+	for suit in Card.Suit.values():
+		for rank in range(Card.ACE, Card.KING+1):
+			cards.push_back(Card.newCard(suit, rank))
+
+	cards.shuffle()
+	
+	var z = 0
+	for card in cards:
+		cascades[z % 8].on_drop(Vector2(), card)
+		z += 1
+		card.z_index = z
+		add_child(card)

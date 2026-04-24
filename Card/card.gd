@@ -18,6 +18,11 @@ enum Suit {
 	Clubs,
 }
 
+enum Colour {
+	Red,
+	Black,
+}
+
 const ACE = 1
 const JACK = 11
 const QUEEN = 12
@@ -25,26 +30,48 @@ const KING = 13
 
 const CARDS_PER_SUIT = 13
 
-@export var cardStyle: CardStyle:
+@export 
+var cardStyle: CardStyle:
 	set(value):
 		cardStyle = value
 		if (sprite): update_sprite()
 
-@export var suit: Suit: 
+@export 
+var suit: Suit: 
 	set(value):
 		suit = value
 
-@export_range(ACE, KING) var rank: int : # 1 = Ace, 11 = Jack, 12 = Queen, 13 = King
+@export_range(ACE, KING) 
+var rank: int : # 1 = Ace, 11 = Jack, 12 = Queen, 13 = King
 	set(value):
 		rank = value
 
-@onready var sprite = %AnimatedSprite2D
+@export 
+var colour: Colour:
+	get:
+		return Colour.Red if (suit == Suit.Hearts or suit == Suit.Diamonds) else Colour.Black
 
-func _process(_delta: float) -> void:
-	# Each _process -> Look at what this card is attached to and move to the correct location
-	# If on a CardFrame -> move to that exact location
-	# If on another card -> move to that card's location, then parentCard.position.y += Y
-	
+var root_ancestor: CardFrame = null
+
+@onready 
+var sprite = %AnimatedSprite2D
+
+func _init() -> void:
+	modulate_colour = Color(1.25, 1.25, 1.25)
+
+func _to_string() -> String:
+	return "%s of %s (%s)" % [rank_str(rank), Suit.find_key(suit), Colour.find_key(colour)]
+
+func rank_str(rank: int) -> String:
+	match rank:
+		ACE: return "Ace"
+		JACK: return "Jack"
+		QUEEN: return "Queen"
+		KING: return "King"
+	return "%s" % rank
+		
+
+func _process(delta: float) -> void:
 	if is_dragging:
 		if Input.is_action_pressed("mouse_action"):
 			#print("dragging ", position, drag_offset)
@@ -52,6 +79,18 @@ func _process(_delta: float) -> void:
 			pass
 		else:
 			cancel_drop()
+		return
+
+	# Look at what this card is attached to and move to the correct location
+	# If on a CardFrame -> move to that exact location
+	# If on another card -> move to that card's location, then parentCard.position.y += Y
+	if parent:
+		var move_target = parent.child_position()
+		if !position.is_equal_approx(move_target):
+			#prints(self, "Moving:", position, "->", move_target)
+			#lerp(position, move_target, 1 * delta)
+			position = move_target
+
 
 func update_sprite():
 	sprite.animation = CardStyle.keys()[cardStyle]
@@ -60,47 +99,94 @@ func update_sprite():
 var is_dragging = false
 var last_position: Vector2
 
+
+const use_simple_rules = true
+func can_start_drag(frameType: CardFrame.FrameType) -> bool:
+	#TODO: Variant -- locked in on foundations
+	#if (root_ancestor.frameType == CardFrame.FrameType.Hearts_Foundation ||
+		#root_ancestor.frameType == CardFrame.FrameType.Spades_Foundation ||
+		#root_ancestor.frameType == CardFrame.FrameType.Diamonds_Foundation ||
+		#root_ancestor.frameType == CardFrame.FrameType.Clubs_Foundation):
+		## Can't drag off the foundations
+		#prints("Can't drag off a foundation")
+		#return false
+	if use_simple_rules:	
+		return true
+	
+	# TODO: When using regular rules, prevent dragging a card if it's direct child is not the next rank down and the opposite colour
+	
+	return true
+
+
 func drag_start(at_position: Vector2) -> Variant:
-	last_position = position
-	is_dragging = true
+	if !can_start_drag(root_ancestor.frameType):
+		return null
 	
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 	
 	var preview_card = self.duplicate()
 	preview_card.z_index = RenderingServer.CANVAS_ITEM_Z_MAX
+	preview_card.modulate = Color(1, 1, 1, 1)
 	var control = Control.new()
 	control.add_child(preview_card)
 	preview_card.position = Vector2.ZERO - at_position #This ensures the drag preview is at the expected location
 	set_drag_preview(control)
 	
+	last_position = position
+	is_dragging = true
+	
 	self.modulate.a = 0
-	print(self.rank, " ", Suit.find_key(self.suit))
+	#print("%s of %s (First child: %s, Last child: %s)" % [self.rank, Suit.find_key(self.suit), self.next_card, self.last_card])
 	return self
+
 
 func end_drop() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	self.modulate.a = 1
+	self.modulate = Color(1, 1, 1, 1)
 	is_dragging = false
 
+
 func cancel_drop() -> void:
-	print("drop cancelled")
+	#print("drop cancelled")
 	end_drop()
 	position = last_position
 	pass
 
 func can_drop(at_position:Vector2, data: Variant) -> bool:
-	prints("can drop?", at_position, data.suit, data.rank)
-	return true
+	var dragged = data as Card
+	# If this isn't a card, or isn't attached to anything, then we can't drop on it
+	if dragged == null or !root_ancestor: return false
+	
+	# Use the root to determine whether we can drop here or not	
+	return root_ancestor.can_drop(at_position, dragged)
 
-func on_drop(at_position: Vector2, data: Variant) -> void:
-	end_drop()
-	print("drag end", at_position, data)
-	pass
 
+func on_drop(at_position: Vector2, data: Variant) -> void:	
+	print("drag end -> delegating to root ancestor", at_position, data)
+	return root_ancestor.on_drop(at_position, data)
+
+
+func child_position() -> Vector2:
+	if root_ancestor.frameType in [
+		CardFrame.FrameType.Hearts_Foundation, 
+		CardFrame.FrameType.Spades_Foundation, 
+		CardFrame.FrameType.Diamonds_Foundation, 
+		CardFrame.FrameType.Clubs_Foundation,
+	]:
+		return position
+	return position + Vector2(0, 16)
+
+func hover() -> void:
+	if !is_dragging:
+		super.hover()
+
+func end_hover() -> void:
+	if !is_dragging:
+		super.end_hover()
 
 
 static func newCard(_suit: Suit, _rank: int) -> Card:
-	var new_card = scene.instantiate()
+	var new_card = scene.instantiate() as Card
 
 	new_card.suit = _suit
 	new_card.rank = clampi(_rank, ACE, KING)

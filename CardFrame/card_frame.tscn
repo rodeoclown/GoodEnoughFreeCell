@@ -54,14 +54,17 @@ animations = [{
 }]
 
 [node name="CardFrame" type="Control" unique_id=1338593512]
+custom_minimum_size = Vector2(61, 83)
 layout_mode = 3
-anchor_right = 0.048
-anchor_bottom = 0.115
-offset_right = -0.44000244
-offset_bottom = 0.19999695
+anchors_preset = 0
+offset_right = 61.0
+offset_bottom = 83.0
 script = ExtResource("1_ayj8k")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=826418826]
 unique_name_in_owner = true
 sprite_frames = SubResource("SpriteFrames_ew1p5")
 centered = false
+
+[connection signal="mouse_entered" from="." to="." method="hover"]
+[connection signal="mouse_exited" from="." to="." method="end_hover"]
