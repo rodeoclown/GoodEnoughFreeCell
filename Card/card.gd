@@ -57,7 +57,7 @@ var table: Table
 var root_ancestor: CardFrame = null
 
 @onready 
-var sprite = %AnimatedSprite2D
+var sprite: AnimatedSprite2D = %AnimatedSprite2D
 
 func _init() -> void:
 	modulate_colour = Color(1.25, 1.25, 1.25)

@@ -1,13 +1,13 @@
 extends Node
 
+const SELECT_SHADER_MATERIAL = preload("res://Card/card_select_material.tres")
+
 var selected_card: Card:
 	set(value):
-		if value == null:
-			#TODO: Clear the highlight on the selected card
-			prints("Unselecting %s" % SelectionManager.selected_card)
-			pass
-		else:
-			#TODO: Set a highlight on the selected card
-			prints("Selecting %s" % SelectionManager.selected_card)
-			pass
+		if (selected_card):
+			selected_card.sprite.material = null
+		
+		if (value):
+			value.sprite.material = SELECT_SHADER_MATERIAL
+			
 		selected_card = value

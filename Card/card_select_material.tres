@@ -1,0 +1,9 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://bsyhlnsdwwmg0"]
+
+[ext_resource type="Shader" uid="uid://cdqiy6so7s8ia" path="res://Card/card_select.gdshader" id="1_0hdnh"]
+
+[resource]
+shader = ExtResource("1_0hdnh")
+shader_parameter/allow_out_of_bounds = false
+shader_parameter/outline_thickness = 1.0
+shader_parameter/outline_color = Color(0.85104686, 0.39847624, 0.22417721, 1)
