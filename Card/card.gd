@@ -50,6 +50,9 @@ var rank: int : # 1 = Ace, 11 = Jack, 12 = Queen, 13 = King
 var colour: Colour:
 	get:
 		return Colour.Red if (suit == Suit.Hearts or suit == Suit.Diamonds) else Colour.Black
+		
+@export
+var table: Table
 
 var root_ancestor: CardFrame = null
 
@@ -62,15 +65,16 @@ func _init() -> void:
 func _to_string() -> String:
 	return "%s of %s (%s)" % [rank_str(rank), Suit.find_key(suit), Colour.find_key(colour)]
 
-func rank_str(rank: int) -> String:
-	match rank:
+static func rank_str(r: int) -> String:
+	match r:
 		ACE: return "Ace"
 		JACK: return "Jack"
 		QUEEN: return "Queen"
 		KING: return "King"
-	return "%s" % rank
+	return "%s" % r
 		
 
+var t: float = 0
 func _process(delta: float) -> void:
 	if is_dragging:
 		if Input.is_action_pressed("mouse_action"):
@@ -80,16 +84,56 @@ func _process(delta: float) -> void:
 		else:
 			cancel_drop()
 		return
-
+		
 	# Look at what this card is attached to and move to the correct location
 	# If on a CardFrame -> move to that exact location
 	# If on another card -> move to that card's location, then parentCard.position.y += Y
+	# If the direct parent is currently dragging, follow the mouse position + the preview card offset instead
 	if parent:
 		var move_target = parent.child_position()
-		if !position.is_equal_approx(move_target):
+		if (parent as Card) && (parent as Card).is_dragging:
+			move_target = get_global_mouse_position() + preview_card.child_position() 
+		
+		if position.is_equal_approx(move_target):
+			position = move_target
+			t = 0
+		else:
+			t += delta
 			#prints(self, "Moving:", position, "->", move_target)
 			#lerp(position, move_target, 1 * delta)
 			position = move_target
+
+
+func _gui_input(event: InputEvent) -> void:
+	#print(event)
+	var m_event = event as InputEventMouseButton
+	if not m_event or m_event.button_index != MOUSE_BUTTON_LEFT : return
+	get_viewport().set_input_as_handled()
+	
+	if m_event.double_click:
+		# Move this card to the best location it can go (can only double-click the last card)
+		if !has_children():
+			#prints("%s: %s double_clicked" % [self, m_event.button_index])
+			self.move_to_best_location()
+	elif m_event.pressed:
+		# Do nothing
+		# prints("%s: %s pressed" % [self, m_event.button_index])
+		pass
+	elif not m_event.pressed: #released
+		prints("%s: %s released" % [self, m_event.button_index])
+		# Unselect if already selected, then return
+		if (SelectionManager.selected_card == self):
+			SelectionManager.selected_card = null
+			return
+		
+		# If there is already a selected card see if we can drop it where we just clicked
+		if (SelectionManager.selected_card != null && self.root_ancestor.can_drop(Vector2.ZERO, SelectionManager.selected_card)):
+			self.root_ancestor.on_drop(Vector2.ZERO, SelectionManager.selected_card)
+			SelectionManager.selected_card = null
+			return		
+		
+		# Otherwise select this card instead
+		SelectionManager.selected_card = self
 
 
 func update_sprite():
@@ -101,7 +145,7 @@ var last_position: Vector2
 
 
 const use_simple_rules = true
-func can_start_drag(frameType: CardFrame.FrameType) -> bool:
+func can_start_drag(_frameType: CardFrame.FrameType) -> bool:
 	#TODO: Variant -- locked in on foundations
 	#if (root_ancestor.frameType == CardFrame.FrameType.Hearts_Foundation ||
 		#root_ancestor.frameType == CardFrame.FrameType.Spades_Foundation ||
@@ -117,14 +161,14 @@ func can_start_drag(frameType: CardFrame.FrameType) -> bool:
 	
 	return true
 
-
+static var preview_card: Card
 func drag_start(at_position: Vector2) -> Variant:
 	if !can_start_drag(root_ancestor.frameType):
 		return null
 	
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 	
-	var preview_card = self.duplicate()
+	preview_card = self.duplicate()
 	preview_card.z_index = RenderingServer.CANVAS_ITEM_Z_MAX
 	preview_card.modulate = Color(1, 1, 1, 1)
 	var control = Control.new()
@@ -167,7 +211,7 @@ func on_drop(at_position: Vector2, data: Variant) -> void:
 
 
 func child_position() -> Vector2:
-	if root_ancestor.frameType in [
+	if root_ancestor and root_ancestor.frameType in [
 		CardFrame.FrameType.Hearts_Foundation, 
 		CardFrame.FrameType.Spades_Foundation, 
 		CardFrame.FrameType.Diamonds_Foundation, 
@@ -184,11 +228,43 @@ func end_hover() -> void:
 	if !is_dragging:
 		super.end_hover()
 
+func move_to_best_location():
+	# See if there is a valid foundation to send the card to
+	for foundation in table.foundations:
+		if (foundation.can_drop(Vector2.ZERO, self)):
+			foundation.on_drop(Vector2.ZERO, self)
+			return
+	
+	# See if there is a cascade to send the card to (starting with the next cascade from the one this is in and moving right)
+	var start_i: int = 8
+	if (self.root_ancestor.frameType == CardFrame.FrameType.Cascade):
+		start_i = self.root_ancestor.count
+		
+	for i in table.cascades.size():
+		var cascade = table.cascades[start_i % 8]
+		if (cascade.can_drop(Vector2.ZERO, self)):
+			cascade.on_drop(Vector2.ZERO, self)
+			return
+		start_i += 1
+		
+	# Move to a valid free cell (unless already on one)
+	if (self.root_ancestor.frameType == CardFrame.FrameType.FreeCell):
+		return
+	for cell in table.freeCells:
+		if (cell.can_drop(Vector2.ZERO, self)):
+			cell.on_drop(Vector2.ZERO, self)
+			return
+		
+	# Otherwise, do nothing...
+	return
 
-static func newCard(_suit: Suit, _rank: int) -> Card:
+
+static func newCard(_suit: Suit, _rank: int, _table: Table) -> Card:
 	var new_card = scene.instantiate() as Card
 
 	new_card.suit = _suit
 	new_card.rank = clampi(_rank, ACE, KING)
 
+	new_card.table = _table
+	
 	return new_card

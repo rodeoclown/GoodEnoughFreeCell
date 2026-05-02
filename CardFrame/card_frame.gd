@@ -19,6 +19,7 @@ enum FrameType {
 		frameType = value
 		if (sprite): update_sprite()
 
+@export var count: int
 
 @onready var sprite = %AnimatedSprite2D
 func update_sprite():
@@ -137,10 +138,31 @@ func reset_cards() -> void:
 		child = child.parent
 		child.last_card = self.last_card
 
+func _gui_input(event: InputEvent) -> void:
+	var m_event = event as InputEventMouseButton
+	if not m_event or m_event.button_index != MOUSE_BUTTON_LEFT : return
+	get_viewport().set_input_as_handled()
+	
+	if m_event.double_click:
+		return
+	elif m_event.pressed:
+		# Do nothing
+		return
+	elif not m_event.pressed: #released
+		prints("%s: %s released" % [self, m_event.button_index])
+		
+		# If there is a selected card, try and drop it
+		if (SelectionManager.selected_card != null and can_drop(Vector2.ZERO, SelectionManager.selected_card)):
+			on_drop(Vector2.ZERO, SelectionManager.selected_card)
+			SelectionManager.selected_card = null
 
-static func newCardFrame(type: FrameType) -> CardFrame:
+
+
+static func newCardFrame(type: FrameType, _count: int) -> CardFrame:
 	var frame = scene.instantiate() as CardFrame
 	frame.frameType = type
 	frame.z_index = -1
+	
+	frame.count = _count
 
 	return frame

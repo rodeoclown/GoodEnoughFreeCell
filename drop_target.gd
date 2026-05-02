@@ -7,6 +7,7 @@
 @abstract func update_sprite() -> void
 
 var modulate_colour: Color
+var is_mouseover: bool
 
 func _ready() -> void:
 	update_sprite()
@@ -21,7 +22,9 @@ func has_children() -> bool:
 
 
 func hover() -> void:
+	self.is_mouseover = true
 	self.modulate = modulate_colour
 
 func end_hover() -> void:
+	self.is_mouseover = false
 	self.modulate = Color(1,1,1,1)
