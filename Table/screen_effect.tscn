@@ -1,0 +1,29 @@
+[gd_scene format=3 uid="uid://dsoaeso5mj5bx"]
+
+[ext_resource type="Shader" uid="uid://8q6xog1afysi" path="res://Table/screen_effect.gdshader" id="1_r4md5"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ybwc7"]
+shader = ExtResource("1_r4md5")
+shader_parameter/smearing = 0.0
+shader_parameter/color_offset = 1.6299399954733396e-09
+shader_parameter/sharpening = 0.0
+shader_parameter/static_noise = 0.0
+shader_parameter/crack_center = Vector2(0, 0)
+shader_parameter/crack_intensity = 0.0
+shader_parameter/crack_size = 0.0
+shader_parameter/vertical_jitter = 0.0
+shader_parameter/scanline_opacity = 0.03600000171
+shader_parameter/vignette_intensity = 0.1750000083125
+
+[node name="ScreenEffect" type="ColorRect" unique_id=1574516438]
+z_index = 4096
+z_as_relative = false
+material = SubResource("ShaderMaterial_ybwc7")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 2

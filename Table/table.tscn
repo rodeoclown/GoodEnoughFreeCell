@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://dqvx3xge3dlpj"]
 
 [ext_resource type="Script" uid="uid://6xotbbj367cg" path="res://Table/table.gd" id="1_6e54x"]
+[ext_resource type="PackedScene" uid="uid://dsoaeso5mj5bx" path="res://Table/screen_effect.tscn" id="2_6e54x"]
 
 [sub_resource type="Shader" id="Shader_gi8cj"]
 code = "shader_type canvas_item;
@@ -83,3 +84,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_6e54x")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=486990962]
+
+[node name="ScreenEffect" parent="CanvasLayer" unique_id=1574516438 instance=ExtResource("2_6e54x")]
