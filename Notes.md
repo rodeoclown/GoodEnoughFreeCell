@@ -9,8 +9,3 @@ Cascade * 8
 Free Cell * 4
 - Can hold any card
 - No other cards
-
-Drop Target
-- Allows a card to be dropped on it
-
-Card Frame - UI
