@@ -7,7 +7,10 @@ var selected_card: Card:
 		if (selected_card):
 			selected_card.sprite.material = null
 		
-		if (value):
+		if (value && value.can_start_drag()):
 			value.sprite.material = SELECT_SHADER_MATERIAL
+		else:
+			# If this is not a valid card selection, then we clear it
+			value = null
 			
 		selected_card = value
