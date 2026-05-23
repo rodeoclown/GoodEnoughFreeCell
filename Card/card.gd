@@ -144,9 +144,9 @@ var is_dragging = false
 var last_position: Vector2
 
 
-const use_simple_rules = true
-func can_start_drag(_frameType: CardFrame.FrameType) -> bool:
-	#TODO: Variant -- locked in on foundations
+const use_simple_rules = false
+func can_start_drag() -> bool:
+	#TODO: Possible Variant -- locked in on foundations
 	#if (root_ancestor.frameType == CardFrame.FrameType.Hearts_Foundation ||
 		#root_ancestor.frameType == CardFrame.FrameType.Spades_Foundation ||
 		#root_ancestor.frameType == CardFrame.FrameType.Diamonds_Foundation ||
@@ -157,13 +157,12 @@ func can_start_drag(_frameType: CardFrame.FrameType) -> bool:
 	if use_simple_rules:	
 		return true
 	
-	# TODO: When using regular rules, prevent dragging a card if it's direct child is not the next rank down and the opposite colour
-	
-	return true
+	# When using regular rules, prevent dragging a card if it's direct child is not the next rank down and the opposite colour
+	return (!next_card || (next_card.colour != self.colour && next_card.rank == (self.rank-1)))
 
 static var preview_card: Card
 func drag_start(at_position: Vector2) -> Variant:
-	if !can_start_drag(root_ancestor.frameType):
+	if !can_start_drag():
 		return null
 	
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
@@ -228,12 +227,16 @@ func end_hover() -> void:
 	if !is_dragging:
 		super.end_hover()
 
-func move_to_best_location():
+func move_to_best_location(only_foundation: bool=false) -> bool:
 	# See if there is a valid foundation to send the card to
 	for foundation in table.foundations:
 		if (foundation.can_drop(Vector2.ZERO, self)):
 			foundation.on_drop(Vector2.ZERO, self)
-			return
+			return true
+	
+	# If we only want to check foundations, then we are returning false (i.e., not moving anything)
+	if (only_foundation):
+		return false
 	
 	# See if there is a cascade to send the card to (starting with the next cascade from the one this is in and moving right)
 	var start_i: int = 8
@@ -244,19 +247,19 @@ func move_to_best_location():
 		var cascade = table.cascades[start_i % 8]
 		if (cascade.can_drop(Vector2.ZERO, self)):
 			cascade.on_drop(Vector2.ZERO, self)
-			return
+			return true
 		start_i += 1
 		
 	# Move to a valid free cell (unless already on one)
 	if (self.root_ancestor.frameType == CardFrame.FrameType.FreeCell):
-		return
+		return false
 	for cell in table.freeCells:
 		if (cell.can_drop(Vector2.ZERO, self)):
 			cell.on_drop(Vector2.ZERO, self)
-			return
+			return true
 		
 	# Otherwise, do nothing...
-	return
+	return false
 
 
 static func newCard(_suit: Suit, _rank: int, _table: Table) -> Card:

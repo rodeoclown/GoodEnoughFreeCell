@@ -13,6 +13,7 @@ enum FrameType {
 	Cascade,
 }
 
+signal after_drop(frame: CardFrame)
 
 @export var frameType: FrameType:
 	set(value):
@@ -107,6 +108,8 @@ func on_drop(_at_position: Vector2, data: Variant) -> void:
 	if old_root:
 		old_root.reset_cards()
 		print("Moved %s from: %s [%s] -> %s [%s]." % [dragged, old_root, old_root.last_card, self, self.last_card])
+	
+	after_drop.emit(self, old_root)
 
 
 func child_position() -> Vector2:

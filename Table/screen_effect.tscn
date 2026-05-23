@@ -5,7 +5,7 @@
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ybwc7"]
 shader = ExtResource("1_r4md5")
 shader_parameter/smearing = 0.0
-shader_parameter/color_offset = 1.6299399954733396e-09
+shader_parameter/color_offset = 1.6299399954733394e-09
 shader_parameter/sharpening = 0.0
 shader_parameter/static_noise = 0.0
 shader_parameter/crack_center = Vector2(0, 0)
