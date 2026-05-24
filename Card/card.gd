@@ -126,10 +126,10 @@ func _gui_input(event: InputEvent) -> void:
 		if m_event.button_index == MOUSE_BUTTON_RIGHT && !is_dragging:
 			z_index = SHOW_CARD_Z_INDEX
 		# Otherwise do nothing
-		prints("%s: %s pressed" % [self, m_event.button_index])
+		#prints("%s: %s pressed" % [self, m_event.button_index])
 		pass
 	elif not m_event.pressed: #released
-		prints("%s: %s released" % [self, m_event.button_index])
+		#prints("%s: %s released" % [self, m_event.button_index])
 		if m_event.button_index == MOUSE_BUTTON_RIGHT:
 			z_index = DEFAULT_CARD_Z_INDEX
 			
@@ -138,11 +138,20 @@ func _gui_input(event: InputEvent) -> void:
 			SelectionManager.selected_card = null
 			return
 		
-		# If there is already a selected card see if we can drop it where we just clicked
-		if (SelectionManager.selected_card != null && self.root_ancestor.can_drop(Vector2.ZERO, SelectionManager.selected_card)):
-			self.root_ancestor.on_drop(Vector2.ZERO, SelectionManager.selected_card)
-			SelectionManager.selected_card = null
-			return		
+		# If there is already a selected card see if we can drop it or one of its parents where we just clicked
+		if SelectionManager.selected_card != null:
+			var c = SelectionManager.selected_card
+			while c:
+				if (self.root_ancestor.can_drop(Vector2.ZERO, c)):
+					self.root_ancestor.on_drop(Vector2.ZERO, c)
+					SelectionManager.selected_card = null
+					return
+				# If the parent is one rank higher and opposite colour, then continue walking up the card stack
+				var p = c.parent as Card
+				if p && p.colour != c.colour && p.rank == c.rank + 1:
+					c = p
+				else:
+					c = null
 		
 		# Otherwise select this card instead
 		SelectionManager.selected_card = self

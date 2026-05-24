@@ -85,5 +85,5 @@ func move_cards_to_foundations():
 	for target in (freeCells + cascades):
 		if (target.last_card && target.last_card.rank <= min_foundation + 2):
 			if target.last_card.move_to_best_location(true):
-				prints("Can move %s" % target.last_card)
+				#prints("Can move %s" % target.last_card)
 				return
