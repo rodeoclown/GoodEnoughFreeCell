@@ -3,6 +3,7 @@ class_name Card extends DropTarget
 const scene: PackedScene = preload("res://Card/card.tscn")
 
 const DEFAULT_CARD_Z_INDEX = 10
+const SHOW_CARD_Z_INDEX = 50
 const DRAGGED_CARD_Z_INDEX = 100
 
 enum CardStyle {
@@ -81,7 +82,7 @@ var t: float = 0
 func _process(delta: float) -> void:
 	if is_dragging:
 		if Input.is_action_pressed("mouse_action"):
-			#print("dragging ", position, drag_offset)
+			#print("dragging ", position)
 			#position = get_global_mouse_position()
 			pass
 		else:
@@ -110,7 +111,9 @@ func _process(delta: float) -> void:
 func _gui_input(event: InputEvent) -> void:
 	#print(event)
 	var m_event = event as InputEventMouseButton
-	if not m_event or m_event.button_index != MOUSE_BUTTON_LEFT : return
+	if not m_event or (m_event.button_index != MOUSE_BUTTON_LEFT and m_event.button_index != MOUSE_BUTTON_RIGHT): 
+		return
+		
 	get_viewport().set_input_as_handled()
 	
 	if m_event.double_click:
@@ -119,11 +122,17 @@ func _gui_input(event: InputEvent) -> void:
 			#prints("%s: %s double_clicked" % [self, m_event.button_index])
 			self.move_to_best_location()
 	elif m_event.pressed:
-		# Do nothing
-		# prints("%s: %s pressed" % [self, m_event.button_index])
+		# If right mouse button, bring the card to the front
+		if m_event.button_index == MOUSE_BUTTON_RIGHT && !is_dragging:
+			z_index = SHOW_CARD_Z_INDEX
+		# Otherwise do nothing
+		prints("%s: %s pressed" % [self, m_event.button_index])
 		pass
 	elif not m_event.pressed: #released
 		prints("%s: %s released" % [self, m_event.button_index])
+		if m_event.button_index == MOUSE_BUTTON_RIGHT:
+			z_index = DEFAULT_CARD_Z_INDEX
+			
 		# Unselect if already selected, then return
 		if (SelectionManager.selected_card == self):
 			SelectionManager.selected_card = null
