@@ -2265,6 +2265,8 @@ animations = [{
 [node name="Card" type="Control" unique_id=1690754056]
 self_modulate = Color(1, 1, 1, 0.29803923)
 clip_children = 1
+z_as_relative = false
+y_sort_enabled = true
 custom_minimum_size = Vector2(55, 75)
 layout_mode = 3
 anchors_preset = 0

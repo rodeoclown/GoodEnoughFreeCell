@@ -42,11 +42,11 @@ func _ready() -> void:
 
 	cards.shuffle()
 	
-	var z = 0
+	var i = 0
 	for card in cards:
-		cascades[z % 8].on_drop(Vector2(), card)
-		z += 1
-		card.z_index = z
+		cascades[i % 8].on_drop(Vector2(), card)
+		i += 1
+		card.z_index = Card.DEFAULT_CARD_Z_INDEX
 		add_child(card)
 	
 	initialising = false

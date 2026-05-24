@@ -2,6 +2,9 @@ class_name Card extends DropTarget
 
 const scene: PackedScene = preload("res://Card/card.tscn")
 
+const DEFAULT_CARD_Z_INDEX = 10
+const DRAGGED_CARD_Z_INDEX = 100
+
 enum CardStyle {
 	aged,
 	red_back,
@@ -168,7 +171,7 @@ func drag_start(at_position: Vector2) -> Variant:
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 	
 	preview_card = self.duplicate()
-	preview_card.z_index = RenderingServer.CANVAS_ITEM_Z_MAX
+	preview_card.z_index = DRAGGED_CARD_Z_INDEX
 	preview_card.modulate = Color(1, 1, 1, 1)
 	var control = Control.new()
 	control.add_child(preview_card)
@@ -180,6 +183,16 @@ func drag_start(at_position: Vector2) -> Variant:
 	
 	self.modulate.a = 0
 	#print("%s of %s (First child: %s, Last child: %s)" % [self.rank, Suit.find_key(self.suit), self.next_card, self.last_card])
+	
+	# We need to muck around with the z-indexing while dragging to ensure that these child cards are layered correctly
+	# and that they go over the top of all other cards
+	var c = next_card
+	var z = DRAGGED_CARD_Z_INDEX
+	while c:
+		z += 1
+		c.z_index = z
+		c = c.next_card
+	
 	return self
 
 
@@ -193,6 +206,7 @@ func cancel_drop() -> void:
 	#print("drop cancelled")
 	end_drop()
 	position = last_position
+	root_ancestor.reset_cards()
 	pass
 
 func can_drop(at_position:Vector2, data: Variant) -> bool:

@@ -77,7 +77,7 @@ func can_drop(_at_position: Vector2, data: Variant) -> bool:
 				
 	# TODO: When using regular rules, prevent dropping multiple cards if there are not enough slots to move each card separately
 		
-	print("can drop? -- %s -> %s [%s]: %s " % [dragged, self, self.last_card, can_accept])
+	#print("can drop? -- %s -> %s [%s]: %s " % [dragged, self, self.last_card, can_accept])
 	return can_accept
 
 
@@ -126,14 +126,13 @@ func reset_cards() -> void:
 		return
 	
 	while child:
-		var new_z = child.parent.z_index + 1
-		child.z_index = new_z
+		child.z_index = Card.DEFAULT_CARD_Z_INDEX
 		child.root_ancestor = self
 		# Move Control node in the tree so that it is later in the 
 		# list and will receive priority for input events
 		child.move_to_front()
 		self.last_card = child
-		print("\t%s [z: %s, parent: %s]" % [child, new_z, child.parent])
+		#print("\t%s [z: %s, parent: %s]" % [child, new_z, child.parent])
 		child = child.next_card
 		
 	child = self.last_card
