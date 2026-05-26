@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://6xotbbj367cg" path="res://Table/table.gd" id="1_6e54x"]
 [ext_resource type="PackedScene" uid="uid://dsoaeso5mj5bx" path="res://Table/screen_effect.tscn" id="2_6e54x"]
+[ext_resource type="PackedScene" uid="uid://n7g2ytxqrwpq" path="res://Title/title.tscn" id="3_0lnib"]
 
 [sub_resource type="Shader" id="Shader_gi8cj"]
 code = "shader_type canvas_item;
@@ -75,7 +76,7 @@ shader_parameter/pattern = 1
 shader_parameter/inside = true
 shader_parameter/add_margins = true
 
-[node name="Table" type="Control" unique_id=543977914]
+[node name="Table" type="Control" unique_id=543977914 node_paths=PackedStringArray("title")]
 material = SubResource("ShaderMaterial_6e54x")
 layout_mode = 3
 anchors_preset = 15
@@ -84,6 +85,17 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_6e54x")
+title = NodePath("Title")
+
+[node name="Title" parent="." unique_id=167929972 instance=ExtResource("3_0lnib")]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+offset_left = 5.0
+offset_right = -1075.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=486990962]
 

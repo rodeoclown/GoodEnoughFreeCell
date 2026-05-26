@@ -14,10 +14,12 @@ config/name="FreeCell"
 run/main_scene="uid://dqvx3xge3dlpj"
 config/features=PackedStringArray("4.7", "Forward Plus")
 run/max_fps=60
+boot_splash/show_image=false
 config/icon="res://icon.svg"
 
 [autoload]
 
+GameManager="*uid://bvgvqh48a5hcx"
 SelectionManager="*uid://bs2s3sxnbl0o3"
 
 [display]

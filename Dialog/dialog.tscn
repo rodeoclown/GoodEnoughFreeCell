@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://w0esl6q51ip1"]
+
+[ext_resource type="Texture2D" uid="uid://d1j2sy1ubcnd4" path="res://CardFrame/card_frame.png" id="1_yqm1q"]
+
+[node name="NinePatchRect" type="NinePatchRect" unique_id=1434109883]
+anchors_preset = -1
+offset_right = 200.0
+offset_bottom = 200.0
+texture = ExtResource("1_yqm1q")
+region_rect = Rect2(309, 4, 53, 75)
+patch_margin_left = 6
+patch_margin_top = 6
+patch_margin_right = 6
+patch_margin_bottom = 6

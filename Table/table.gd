@@ -5,14 +5,25 @@ class_name Table extends Control
 @export var freeCells: Array[CardFrame]
 @export var cascades: Array[CardFrame]
 
-var initialising = true
+@export var title: Control
+
+
+var initialising: bool:
+	set(value):
+		GameManager.initialising = value
+	get:
+		return GameManager.initialising
+
 
 func _ready() -> void:
 	self.z_index = RenderingServer.CANVAS_ITEM_Z_MIN
 	
 	## POSITIONING of Game Elements
 	var screen_width = get_viewport_rect().size.x
-	var _screen_height = get_viewport_rect().size.y
+	var screen_height = get_viewport_rect().size.y
+	
+	title.position.x = (screen_width / 2) - 140
+	title.position.y = (screen_height / 2) - 100
 
 	for i in range(0, 4):
 		var cell = CardFrame.newCardFrame(CardFrame.FrameType.FreeCell, i)
@@ -39,7 +50,14 @@ func _ready() -> void:
 	for suit in Card.Suit.values():
 		for rank in range(Card.ACE, Card.KING+1):
 			cards.push_back(Card.newCard(suit, rank, self))
+	
+	deal()
 
+
+func deal():
+	initialising = true
+	SelectionManager.selected_card = null
+	
 	cards.shuffle()
 	
 	var i = 0
@@ -55,9 +73,12 @@ func _ready() -> void:
 
 # Right-click is cancel, but we want this to catch everything
 func _process(_delta: float) -> void:
-	if Input.is_action_just_released("ui_cancel"):
+	if title && Input.is_anything_pressed():
+		title.free()
+		GameManager.title_visible = false
+		
+	elif Input.is_action_just_released("ui_cancel"):
 		SelectionManager.selected_card = null
-	pass
 
 
 func after_drop(drop_target: CardFrame, drop_source: CardFrame):

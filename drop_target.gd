@@ -22,9 +22,11 @@ func has_children() -> bool:
 
 
 func hover() -> void:
+	if GameManager.title_visible: return
 	self.is_mouseover = true
 	self.modulate = modulate_colour
 
 func end_hover() -> void:
+	if GameManager.title_visible: return
 	self.is_mouseover = false
 	self.modulate = Color(1,1,1,1)
