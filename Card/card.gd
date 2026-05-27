@@ -293,6 +293,13 @@ func move_to_best_location(only_foundation: bool=false) -> bool:
 	# Otherwise, do nothing...
 	return false
 
+func reset():
+	root_ancestor = null
+	parent = null
+	next_card = null
+	last_card = null
+	return
+
 
 static func newCard(_suit: Suit, _rank: int, _table: Table) -> Card:
 	var new_card = scene.instantiate() as Card

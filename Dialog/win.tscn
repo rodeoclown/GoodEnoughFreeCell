@@ -1,0 +1,83 @@
+[gd_scene format=3 uid="uid://da25pwqkvu46e"]
+
+[ext_resource type="PackedScene" uid="uid://w0esl6q51ip1" path="res://Dialog/dialog.tscn" id="1_6wgg5"]
+[ext_resource type="PackedScene" uid="uid://bmjgjiawtgq05" path="res://Card/card_sprite.tscn" id="2_4fb03"]
+[ext_resource type="Texture2D" uid="uid://dopiar303waes" path="res://Dialog/you win.png" id="3_s2llf"]
+[ext_resource type="FontFile" uid="uid://omi4gd5kv6ws" path="res://Dialog/Kenney Future Narrow.ttf" id="4_ttqhg"]
+
+[sub_resource type="Theme" id="Theme_isvxe"]
+default_font = ExtResource("4_ttqhg")
+default_font_size = 12
+
+[node name="WinDialog" type="Control" unique_id=167929972]
+z_index = 1001
+z_as_relative = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -999.7368
+offset_bottom = -507.0
+grow_horizontal = 0
+
+[node name="NinePatchRect" parent="." unique_id=1434109883 instance=ExtResource("1_6wgg5")]
+layout_mode = 0
+anchors_preset = 0
+offset_right = 280.7947
+offset_bottom = 212.0
+
+[node name="ColorRect" type="ColorRect" parent="NinePatchRect" unique_id=305109975]
+z_index = -1
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.99000007
+anchor_bottom = 0.98700005
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 1.0132141
+offset_bottom = 0.7559967
+color = Color(0.1584723, 0.15847233, 0.1584723, 1)
+
+[node name="ColorRect-bg" type="ColorRect" parent="NinePatchRect" unique_id=1654089450]
+z_index = -1
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.99000007
+anchor_bottom = 0.98700005
+offset_left = -767.74036
+offset_top = -784.0
+offset_right = 1047.7535
+offset_bottom = 578.756
+color = Color(0.15686275, 0.15686275, 0.15686275, 0.7254902)
+
+[node name="AnimatedSprite2D2" parent="." unique_id=695738590 instance=ExtResource("2_4fb03")]
+position = Vector2(174, 24.999998)
+rotation = 0.31764993
+animation = &"red_back"
+frame = 1
+
+[node name="AnimatedSprite2D3" parent="." unique_id=1296037737 instance=ExtResource("2_4fb03")]
+position = Vector2(59, 42)
+rotation = -0.31764993
+animation = &"red_back"
+frame = 41
+
+[node name="AnimatedSprite2D" parent="." unique_id=1494327910 instance=ExtResource("2_4fb03")]
+position = Vector2(115, 22)
+animation = &"red_back"
+frame = 26
+
+[node name="YouWin" type="Sprite2D" parent="." unique_id=426829652]
+position = Vector2(140, 113)
+texture = ExtResource("3_s2llf")
+
+[node name="PlayAgainButton" type="Button" parent="." unique_id=1868102724]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 85.0
+offset_top = 161.0
+offset_right = 194.0
+offset_bottom = 193.0
+theme = SubResource("Theme_isvxe")
+text = "PLAY AGAIN?"
+text_overrun_behavior = 1

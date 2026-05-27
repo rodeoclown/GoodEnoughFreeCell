@@ -6,6 +6,7 @@ class_name Table extends Control
 @export var cascades: Array[CardFrame]
 
 @export var title: Control
+@export var win_dialog: Control
 
 
 var initialising: bool:
@@ -17,6 +18,7 @@ var initialising: bool:
 
 func _ready() -> void:
 	self.z_index = RenderingServer.CANVAS_ITEM_Z_MIN
+	GameManager.table = self
 	
 	## POSITIONING of Game Elements
 	var screen_width = get_viewport_rect().size.x
@@ -24,7 +26,12 @@ func _ready() -> void:
 	
 	title.position.x = (screen_width / 2) - 140
 	title.position.y = (screen_height / 2) - 100
-
+	
+	win_dialog.position.x = (screen_width / 2) - 140
+	win_dialog.position.y = (screen_height / 2) - 100
+	win_dialog.visible = false
+	win_dialog.find_child("PlayAgainButton").connect("pressed", play_again)
+	
 	for i in range(0, 4):
 		var cell = CardFrame.newCardFrame(CardFrame.FrameType.FreeCell, i)
 		var cardFrameXOffset = ((screen_width / 2) - (4 * CardFrame.width)) / 8
@@ -59,17 +66,28 @@ func deal():
 	SelectionManager.selected_card = null
 	
 	cards.shuffle()
+	reset_card_frames()
 	
 	var i = 0
 	for card in cards:
+		card.reset()
 		cascades[i % 8].on_drop(Vector2(), card)
 		i += 1
 		card.z_index = Card.DEFAULT_CARD_Z_INDEX
-		add_child(card)
+		if (!card.get_parent()):
+			add_child(card)
 	
 	initialising = false
 	move_cards_to_foundations()
 
+func play_again() -> void:
+	win_dialog.visible = false
+	deal()
+
+func reset_card_frames() -> void:
+	for frame in (freeCells + cascades + foundations):
+		frame.next_card = null
+		frame.last_card = null
 
 # Right-click is cancel, but we want this to catch everything
 func _process(_delta: float) -> void:
@@ -81,18 +99,16 @@ func _process(_delta: float) -> void:
 		SelectionManager.selected_card = null
 
 
-func after_drop(drop_target: CardFrame, drop_source: CardFrame):
-	prints("DROPPED %s from %s" % [drop_target, drop_source])
-	
-	# Check for win
-	if foundations.all(has_king):
-		prints("WINNER")
-	else:
-		prints("NOT A WINNER")
+func after_drop(_drop_target: CardFrame, _drop_source: CardFrame):
+	#prints("DROPPED %s from %s" % [drop_target, drop_source])
 	
 	if !initialising:
 		#Check if any cards can be moved to a foundation (and move them)
 		move_cards_to_foundations()
+		
+	# Check for win
+	if foundations.all(has_king):
+		win_dialog.visible = true
 
 func has_king(foundation: CardFrame):
 	return foundation.last_card && foundation.last_card.rank == Card.KING
